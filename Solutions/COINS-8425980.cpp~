@@ -1,0 +1,52 @@
+#include<stdio.h>
+
+typedef struct {
+    int n;
+    long long int val;
+}problem;
+
+problem solvedSet[10000];
+int count; //maintains the count of the number of subproblems solved
+
+long long int solve(int n)
+{
+	if(n==0)return 0;///nothing more to solve
+	
+	///searching extensively in the solvedSet
+	int i;
+	for(i=0;i<count;i++)
+	{
+		if(solvedSet[i].n == n)
+		return solvedSet[i].val;
+	}
+	
+	///solving the sub problems
+	long long int temp;
+	temp = solve(n/2) + solve(n/3) + solve(n/4);
+	
+	//now we need to see if the optimal answer is better than n
+	solvedSet[count].n = n;
+	if(temp>n)
+	solvedSet[count].val = temp;
+	else
+	solvedSet[count].val = n;
+	
+	count++; ///expanding the solvedSet size
+	
+	return solvedSet[count-1].val;
+}
+
+int main()
+{
+	count = 0;
+	int n;
+	while(scanf("%d",&n)!=EOF)
+	{
+		long long int ans=solve(n);
+		printf("%lld\n",ans);
+	}
+	return 0;
+}
+
+
+

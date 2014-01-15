@@ -1,0 +1,96 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+///Fast IO
+const int BUFFSIZE = 10240;
+char BUFF[BUFFSIZE + 1], *p = BUFF;
+int CHAR, SIGN, BYTES = 0;
+#define GETCHAR(c) {								\
+	if(p-BUFF==BYTES && (BYTES==0 || BYTES==BUFFSIZE)){BYTES=fread(BUFF,1,BUFFSIZE,stdin);p=BUFF;}	\
+	if(p-BUFF==BYTES && (BYTES>0 && BYTES<BUFFSIZE)){BUFF[0]=0;p=BUFF;}					\
+	c = *p++;										\
+}
+#define DIGIT(c) (((c) >= '0') && ((c) <= '9'))
+#define LETTER(c)(((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
+#define MINUS(c) ((c)== '-')
+#define GETNUM(n) {								\
+	n = 0;SIGN = 1; do{GETCHAR(CHAR);}while(!(DIGIT(CHAR)|| MINUS(CHAR)));	\
+	if(MINUS(CHAR)){SIGN = -1; GETCHAR(CHAR);}		\
+	while(DIGIT(CHAR)){n = 10*n + CHAR-'0'; GETCHAR(CHAR);}if(SIGN == -1){n = -n;}\
+}
+#define GETWORD(s,i) {								\
+	i = 0;do{GETCHAR(s[i]);}while(!LETTER(s[i]));	\
+	do{GETCHAR(s[++i]);}while(LETTER(s[i]));	\
+	s[i]=0;													\
+}
+
+///Fast IO ends
+
+///Fast IO ends
+struct Person{
+	int h;
+	int n_ahead;
+};
+
+bool comp(Person a, Person b) { return a.h<b.h; }
+
+Person ppl[10002];
+int ordered[10002],n;
+
+int BIT[10003];
+
+void update(int idx, int val){
+	while(idx<=10002){
+		BIT[idx] += val;
+		idx += (idx&-idx);
+	}
+}
+
+int query(int idx){
+	int ans = 0;
+	while(idx>0){
+		ans += BIT[idx];
+		idx -= (idx&-idx);
+	}
+	return ans;
+}
+
+int bs(int x){
+	int lo=1,hi=10002,mid;
+	while(lo<=hi){
+		mid = (lo+hi)>>1;
+		int temp = query(mid);
+		if(temp>=x) hi = mid-1;
+		else lo = mid+1;
+	}
+	return lo;
+}
+
+int main(){
+	int t,i,j;
+	for(scanf("%d",&t);t--;){
+		memset(ordered,0,sizeof(ordered));
+		memset(BIT,0,sizeof(BIT));
+		GETNUM(n);
+		for(i=1;i<=n;i++) GETNUM(ppl[i].h);
+		for(i=1;i<=n;i++) GETNUM(ppl[i].n_ahead);
+
+		sort(ppl+1,ppl+1+n,comp);
+
+		for(i=1;i<=10002;i++){
+			update(i,1);
+		}
+
+		//printf("%d\n",bs(0));
+
+		for(i=1;i<=n;i++){
+			int pos = bs(1+ppl[i].n_ahead);
+			ordered[pos] = ppl[i].h;
+			update(pos,-1);
+		}
+		for(i=1;i<=n;i++) printf("%d ",ordered[i]);
+		printf("\n");
+	}
+}
+
